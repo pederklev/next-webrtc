@@ -1,5 +1,5 @@
-import { Link, Router } from "../routes";
-
+import Router from "next/router";
+import React from "react";
 import { isClient, seedGen } from "../libs/utils";
 
 import Header from "../components/channel/Header";
@@ -7,7 +7,7 @@ import History from "../components/channel/History";
 
 import RTC from "../libs/rtc";
 
-export default class extends React.Component {
+export default class extends React.Component<{ id: string }> {
   static async getInitialProps({ query }) {
     return query;
   }
@@ -29,7 +29,7 @@ export default class extends React.Component {
 
   componentDidMount() {
     if (this.props.id === undefined) {
-      Router.pushRoute(`/`);
+      Router.push(`/`);
     }
     console.log("Channel ID: " + this.props.id);
     setTimeout(() => {
@@ -82,7 +82,9 @@ export default class extends React.Component {
       });
       this.setState({
         channel: "connected",
-        peers: [...new Set([...this.state.peers, message.connection.peer])],
+        peers: Array.from(
+          new Set([...this.state.peers, message.connection.peer])
+        ),
         title: "Channel established"
       });
     });

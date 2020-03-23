@@ -1,5 +1,6 @@
-const EventEmitter = require("eventemitter3");
-require("isomorphic-fetch");
+import EventEmitter from "eventemitter3";
+
+import fetch from "isomorphic-fetch";
 
 import { isClient } from "./utils";
 
@@ -132,7 +133,7 @@ export default class RTC {
   }
 
   static onClose() {
-    console.log("[RTC] Close connection", connection);
+    console.log("[RTC] Close connection");
   }
 
   static onError(error) {
