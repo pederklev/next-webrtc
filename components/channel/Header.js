@@ -1,23 +1,13 @@
-import styled from "styled-components";
-
 export default props => (
-  <Row border>
+  <div>
     <h3>{props.title}</h3>
-    <img
-      src={
-        props.connected ? "/static/connected.svg" : "/static/disconnected.svg"
-      }
-      height={35}
-      style={{ paddingRight: 10 }}
+    <div
+      style={{
+        backgroundColor: props.connected ? "green" : "orange",
+        width: 30,
+        height: 30,
+        borderRadius: 30
+      }}
     />
-  </Row>
+  </div>
 );
-
-const Row = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: ${props => (props.border ? "2px solid #222" : "none")};
-`;

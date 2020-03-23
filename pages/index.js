@@ -1,8 +1,6 @@
 import { Link, Router } from "../routes";
-import styled from "styled-components";
 
 import { isClient, seedGen } from "../libs/utils";
-import { Layout, SingleBox } from "../components/Layout";
 import Setup from "../components/Setup";
 
 export default class extends React.Component {
@@ -28,17 +26,13 @@ export default class extends React.Component {
   render() {
     var { visible } = this.state;
     return (
-      <Layout>
+      <div>
         {/* {console.log(this.state.form)} */}
-        <SingleBox noBg active={visible === 1}>
+        <div>
           {/* <Logo src={"/static/logo.svg"} /> */}
           <Setup setChannel={this.setChannel} {...this.state} />
-        </SingleBox>
-      </Layout>
+        </div>
+      </div>
     );
   }
 }
-
-const Logo = styled.img`
-  height: 40px;
-`;
