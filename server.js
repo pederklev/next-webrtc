@@ -9,6 +9,8 @@ const express = require("express");
 // With Express Peer Server
 const ExpressPeerServer = require("peer").ExpressPeerServer;
 
+const handle = app.getRequestHandler();
+
 app.prepare().then(() => {
   var expressApp = express();
   var server = require("http").createServer(expressApp);
@@ -42,6 +44,8 @@ app.prepare().then(() => {
       })
     );
   });
+
+  expressApp.all("*", (req, res) => handle(req, res));
 
   console.log("Listening on port 3000!");
   expressApp.use(handler);

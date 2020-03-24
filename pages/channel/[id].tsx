@@ -1,21 +1,15 @@
-import Router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
-import { isClient, seedGen } from "../libs/utils";
+import { isClient } from "../../libs/utils";
 
-import Header from "../components/channel/Header";
-import History from "../components/channel/History";
+import Header from "../../components/channel/Header";
+import History from "../../components/channel/History";
 
-import RTC from "../libs/rtc";
-import { NextPage } from "next";
+import RTC from "../../libs/rtc";
 
-interface Props {
-  id: string;
-}
-
-export const Channel: React.FC<Props> = props => {
+export const Channel: React.FC = props => {
   const router = useRouter();
-  console.log(router);
-  const { id } = props;
+  const { id } = router.query;
 
   const [state, setState] = useState({
     visible: 0,
@@ -25,7 +19,7 @@ export const Channel: React.FC<Props> = props => {
     channel: "share",
     userID: undefined,
     peers: [],
-    title: "Waiting for peers to connect...",
+    title: "Initial title. Loading..?",
     history: [
       { msg: "Waiting for a peer...", type: "system", time: Date.now() }
     ],
@@ -36,17 +30,23 @@ export const Channel: React.FC<Props> = props => {
     // if (id === undefined) {
     //   Router.push(`/`);
     // }
+    if (id === undefined) {
+      console.log("found no id");
+      return;
+    }
     console.log("Channel ID: " + id);
     setTimeout(() => {
       setState({ ...state, visible: 1 });
     }, 300);
     initChannel();
-  }, []);
+  }, [id]);
 
   const initChannel = async () => {
     console.log("Init channel ID", id);
     var started = false;
+    console.log("Peer?");
     var peer = await RTC.initChannel(id);
+    console.log("peer: ", peer);
     setState({
       ...state,
       userID: peer.id
@@ -108,9 +108,11 @@ export const Channel: React.FC<Props> = props => {
         peers: state.peers.filter(item => item != message.connection.peer),
         title: "Waiting for peers to connect..."
       });
-      RTC.connectToPeers(props.id);
+      RTC.connectToPeers(id);
     });
   };
+
+  if (!id) return <>blabla</>;
 
   const updateHistory = data => {
     var history = state.history;

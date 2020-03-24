@@ -33,11 +33,13 @@ export default class RTC {
 
   static getID = async roomID => {
     // Need to rewrite with loops
+
     return new Promise(function(resolve, reject) {
       var peerNumber = 0;
       var tryCreateId = () => {
         var tryId = `${roomID}-${peerNumber}`;
         var peer = new Peer(tryId, signalingServer);
+        console.log(peer);
         var errorFn = e => {
           if (e.type === "unavailable-id") {
             peer.destroy();
@@ -53,6 +55,8 @@ export default class RTC {
         peer.on("error", errorFn);
         peer.on("open", openFn);
       };
+      console.log(roomID, "??");
+
       tryCreateId();
     });
   };
