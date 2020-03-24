@@ -7,50 +7,31 @@ import History from "../../components/channel/History";
 
 import RTC from "../../libs/rtc";
 
-export const Channel: React.FC = props => {
+export const Channel: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
 
-  const [state, setState] = useState({
-    visible: 0,
-    alert: false,
-    alertText: "Test",
-    connected: false,
-    channel: "share",
-    userID: undefined,
-    peers: [],
-    title: "Initial title. Loading..?",
-    history: [
-      { msg: "Waiting for a peer...", type: "system", time: Date.now() }
-    ],
-    message: ""
-  });
+  const [userId, setUserId] = useState<undefined | string>();
+  const [alertText, setAlertText] = useState("Test");
+  const [peers, setPeers] = useState([]);
+  const [roomStatus, setRoomStatus] = useState("share");
+  const [title, setTitle] = useState("Loading title");
+  const [message, setMessage] = useState("");
+  const [history, setHistory] = useState([
+    { msg: "Waiting for a peer...", type: "system", time: Date.now() }
+  ]);
 
   useEffect(() => {
-    // if (id === undefined) {
-    //   Router.push(`/`);
-    // }
     if (id === undefined) {
-      console.log("found no id");
+      console.error("Found no channel id");
       return;
     }
-    console.log("Channel ID: " + id);
-    setTimeout(() => {
-      setState({ ...state, visible: 1 });
-    }, 300);
     initChannel();
   }, [id]);
 
   const initChannel = async () => {
-    console.log("Init channel ID", id);
-    var started = false;
-    console.log("Peer?");
     var peer = await RTC.initChannel(id);
-    console.log("peer: ", peer);
-    setState({
-      ...state,
-      userID: peer.id
-    });
+    setUserId(peer.id);
     var Events = RTC.getEvents();
 
     RTC.connectToPeers(id);
@@ -72,11 +53,7 @@ export const Channel: React.FC = props => {
           sender: message.connection.peer,
           time: Date.now()
         });
-        setState({
-          ...state,
-          alert: true,
-          alertText: message.data.error
-        });
+        setAlertText(message.data.error);
       }
     });
     Events.on("peerJoined", async message => {
@@ -87,12 +64,9 @@ export const Channel: React.FC = props => {
         sender: message.connection.peer,
         time: Date.now()
       });
-      setState({
-        ...state,
-        channel: "connected",
-        peers: Array.from(new Set([...state.peers, message.connection.peer])),
-        title: "Channel established"
-      });
+      setTitle("Channel established");
+      setRoomStatus("connected");
+      setPeers(Array.from(new Set([...peers, message.connection.peer])));
     });
     Events.on("peerLeft", message => {
       console.log("Peer Left:", message.connection.peer);
@@ -102,12 +76,9 @@ export const Channel: React.FC = props => {
         sender: message.connection.peer,
         time: Date.now()
       });
-      setState({
-        ...state,
-        channel: "share",
-        peers: state.peers.filter(item => item != message.connection.peer),
-        title: "Waiting for peers to connect..."
-      });
+      setTitle("Waiting for peers to connect...");
+      setRoomStatus("share");
+      setPeers(peers.filter(item => item != message.connection.peer));
       RTC.connectToPeers(id);
     });
   };
@@ -115,41 +86,40 @@ export const Channel: React.FC = props => {
   if (!id) return <>blabla</>;
 
   const updateHistory = data => {
-    var history = state.history;
-    history.push(data);
-    setState({ ...state, history });
+    setHistory([...history, data]);
   };
 
   const sendMessage = e => {
     e.preventDefault();
-    if (!state.message) return;
+    if (!message) return;
     updateHistory({
-      msg: state.message,
+      msg: message,
       type: "me",
       sender: "me",
       time: Date.now()
     });
-    RTC.broadcastMessage({ cmd: "message", msg: state.message });
-    console.log("Sending message", state.message);
-    setState({ ...state, message: "" });
+    RTC.broadcastMessage({ cmd: "message", msg: message });
+    console.log("Sending message", message);
+    setMessage("");
   };
 
   return (
     <div>
       <div>
         <div>
-          <h2 style={{ zIndex: 300 }}>{state.alertText && state.alertText}</h2>
+          <h2 style={{ zIndex: 300 }}>{alertText}</h2>
           <button
-            onClick={() => setState({ ...state, alert: false })}
+            onClick={() => setAlertText("")}
           >{`   Clear Notification  `}</button>
         </div>
       </div>
       <div>
         <div>
           <div>
-            <Header title={state.title} connected={state.peers.length > 0} />
-            <p>Your ID: {state.userID}</p>
-            <p>Connected peers: {state.peers.length}</p>
+            <Header title={title} connected={peers.length > 0} />
+            <p>Status: {roomStatus}</p>
+            <p>Your ID: {userId}</p>
+            <p>Connected peers: {peers.length}</p>
             <br />
             <p>Share this room link with your partner:</p>
             <p>{isClient ? window.location.href : null}</p>
@@ -158,15 +128,13 @@ export const Channel: React.FC = props => {
         </div>
         <div>
           <h3>Channel History</h3>
-          <History messages={state.history} />
+          <History messages={history} />
           <form onSubmit={e => sendMessage(e)}>
             <input
               type={"text"}
               placeholder={"Send a message"}
-              value={state.message}
-              onChange={msg =>
-                setState({ ...state, message: msg.target.value })
-              }
+              value={message}
+              onChange={e => setMessage(e.target.value)}
             />
             <button type={`submit`}>Send</button>
           </form>
