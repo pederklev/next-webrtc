@@ -147,21 +147,6 @@ export default class RTC {
   }
 }
 
-// const saveData = data => {
-//   delete data.digests;
-//   delete data.multisig;
-//   delete data.signatures;
-//   delete data.bundles;
-//   delete data.settlementAddress;
-//   delete data.result;
-//   delete data.flash;
-
-//   fetch(`https://flashdata-edf3d.firebaseio.com/events.json`, {
-//     method: "POST",
-//     body: JSON.stringify(data)
-//   });
-// };
-
 const signalingServer = {
   host: process.env.NODE_ENV === "production" ? "my.domain" : "localhost",
   port: process.env.NODE_ENV === "production" ? 443 : 3000,
